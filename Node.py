@@ -27,7 +27,7 @@ def info_gain(df, binary_target):
     # no = [0 for i in df.columns]
     min_col = None
     min_entropy = None
-    for i in df.columns:
+    for i in range(len(df.columns)-1):
         one_df = df.loc[df[i] == 1]
         zero_df = df.loc[df[i] == 0]
 
@@ -38,7 +38,7 @@ def info_gain(df, binary_target):
         zero_entropy = entropy(zero_df,binary_target)
 
         ws = (one_count*one_entropy + zero_count*zero_entropy)/(one_count+zero_count)
-        print("ws", ws)
+        print("ws", ws, " i",i)
         if(min_entropy == None or ws <min_entropy):
             min_entropy = ws
             min_col = i
