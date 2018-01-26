@@ -29,9 +29,12 @@ clean_labels_df = Load_panda("./Data/cleandata_students.mat",'y')
 clean_df = clean_df.assign(label = clean_labels_df)
 # print(clean_df)
 new_clean_df = clean_df.loc[clean_df[1] == 1]
-
-print("original entropy: ",Node.entropy(clean_df,1))
-Node.info_gain(clean_df, 1)
+clean_df.to_csv("clean_data1.csv", sep=',')
+#print(clean_df.iloc[:,19:25])
+tree = Node.Node(clean_df,1)
+tree.print_tree(0)
+#print("original entropy: ",Node.entropy(clean_df,1))
+#Node.info_gain(clean_df, 1)
 
 # print(new_clean_df.loc[:,1].var())
 # print(clean_df.loc[clean_df[1] == 1].shape[0])
