@@ -6,7 +6,13 @@ class Node:
         self.left = None
         self.right = None
         self.variable = None
-   
+        self.classification = None
+        
+#        we will define a classification [p,1-p] as the probability of being in class binary_target
+#        this is based on the incoming distribution of the node in the training data.
+        
+        self.classification = incoming_dist(df,binary_target)
+        
 #        check if the target variable entropy is 0
         incoming_entropy = entropy(df,binary_target)
         if(incoming_entropy==0):
@@ -39,8 +45,20 @@ class Node:
             self.left.print_tree(level+1)
         if(self.right!=None):
             self.right.print_tree(level+1)
+    
+def incoming_dist(df,binary_target):
+    dist = [0,0]   
+    
+    length = df.shape[0]
+    
+    if (length==0):  
+        return dist
 
-
+    yes = df.loc[df["label"] == binary_target].shape[0]
+    no = length - yes
+    
+    return [yes/(yes+no),no/(yes+no)]
+    
 
 def info_gain(df, binary_target):
 #    print("incoming data frame: ",df)

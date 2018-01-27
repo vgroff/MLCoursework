@@ -32,7 +32,7 @@ new_clean_df = clean_df.loc[clean_df[1] == 1]
 clean_df.to_csv("clean_data1.csv", sep=',')
 #print(clean_df.iloc[:,19:25])
 tree = Node.Node(clean_df,1)
-tree.print_tree(0)
+#tree.print_tree(0)
 #print("original entropy: ",Node.entropy(clean_df,1))
 #Node.info_gain(clean_df, 1)
 
