@@ -6,18 +6,24 @@ import Node
 
 
 class Tree:
-    def __init__(self,df,binary_target):
-        self.root_node = Node.Node(df,binary_target)
+    def __init__(self,df):
+        
+        self.root_nodes = []
+        for i in range(0,6):
+            self.root_nodes.append(Node.Node(df,i+1))
     
-    def print_tree(self):
-        self.root_node.print_nodetree(0)
+#    def print_tree(self):
+#        self.root_node.print_nodetree(0)
         
 #    function to recurse down an entire tree and remove and delete any nodes that are empty.
     
     def classify(self,test_df):
-        return(self.root_node.node_classify(test_df))
+        classification = [0 for i in range(6)]
         
-
+        for j in range(0,6):
+            classification[j] = self.root_nodes[j].node_classify(test_df)
+        return classification
+        
 
 def test_sets(input_data):
     

@@ -48,7 +48,7 @@ class Node:
     def node_classify(self,test_df):
         
 #        return a classification if you have hit a leaf node
-        if(self.left==None and self.right == None):
+        if(self.variable==None):
             return return_class(self.input_prob)
 
 #        otherwise, sort into left/right based on the value of the variable column
