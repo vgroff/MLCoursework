@@ -12,6 +12,7 @@ from scipy.io import *
 import pandas as pda
 import numpy as np
 import Node
+import Tree
 
 def Load_panda(Filename, Variable):
     mat = loadmat(Filename)
@@ -31,8 +32,22 @@ clean_df = clean_df.assign(label = clean_labels_df)
 new_clean_df = clean_df.loc[clean_df[1] == 1]
 clean_df.to_csv("clean_data1.csv", sep=',')
 #print(clean_df.iloc[:,19:25])
-tree = Node.Node(clean_df,1)
-#tree.print_tree(0)
+#tree = Tree.Tree(clean_df,3)
+
+test_row = clean_df.iloc[13,:]
+test_col = clean_df.loc[:,"label"]
+print("Test Row: ",test_row)
+
+
+print(Tree.confusion_matrix(test_col,test_col))
+#print(tree.classify(test_row))
+#test = Tree.test_sets(clean_df)
+
+
+#print("test size: ",len(test))
+#print(test[0])
+#print(test[9])
+#print(tree.print_tree())
 #print("original entropy: ",Node.entropy(clean_df,1))
 #Node.info_gain(clean_df, 1)
 

@@ -6,12 +6,14 @@ class Node:
         self.left = None
         self.right = None
         self.variable = None
-        self.classification = None
+        self.input_prob = None
+        self.left_prob = None
+        self.right_prob = None
         
 #        we will define a classification [p,1-p] as the probability of being in class binary_target
 #        this is based on the incoming distribution of the node in the training data.
         
-        self.classification = incoming_dist(df,binary_target)
+        self.input_prob = probability(df,binary_target)
         
 #        check if the target variable entropy is 0
         incoming_entropy = entropy(df,binary_target)
@@ -28,6 +30,9 @@ class Node:
             
             left_df = df.loc[df[col_str] == 0]
             right_df = df.loc[df[col_str] == 1]
+            
+            self.left_prob = probability(left_df,binary_target)
+            self.right_prob = probability(right_df,binary_target)
 
             del left_df[col_str]
 #            print(left_df.iloc[:,10:30])
@@ -39,14 +44,47 @@ class Node:
             if(uniform_df(right_df,binary_target)== False and right_df.shape[0]!=0):
                 self.right = Node(right_df,binary_target)
                 
-    def print_tree(self,level):
+    
+    def node_classify(self,test_df):
+        
+#        return a classification if you have hit a leaf node
+        if(self.left==None and self.right == None):
+            return return_class(self.input_prob)
+
+#        otherwise, sort into left/right based on the value of the variable column
+        if(test_df[self.variable]==0):
+#           may have the case that the left node leads to nothing
+            if(self.left==None):
+                return return_class(self.left_prob)
+            else:
+                return self.left.node_classify(test_df)
+        else: #now for the right node
+#           may have the case that the right node leads to nothing
+            if(self.right==None):
+                return return_class(self.right_prob)
+            else:
+                return self.right.node_classify(test_df)
+        
+                
+    def print_nodetree(self,level):
         print("Level ",level,", ",self.variable)
         if(self.left!=None):
-            self.left.print_tree(level+1)
+            self.left.print_nodetree(level+1)
         if(self.right!=None):
-            self.right.print_tree(level+1)
-    
-def incoming_dist(df,binary_target):
+            self.right.print_nodetree(level+1)
+
+
+def return_class(prob_array):
+    if(prob_array[0]>prob_array[1]):
+        return True
+    elif(prob_array[0]<prob_array[1]):
+        return False
+    else:
+#              return a random yes/no if the probabilities are equal
+        return bool(random.getrandbits(1))
+
+#This is thedistribution of the binary_target for each Node, produced from the training set    
+def probability(df,binary_target):
     dist = [0,0]   
     
     length = df.shape[0]
@@ -119,3 +157,5 @@ def uniform_df(df,binary_target):
     if(entropy(df,binary_target)==0):
         return True
     return False
+
+
