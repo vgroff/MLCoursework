@@ -35,14 +35,14 @@ new_clean_df = clean_df.loc[clean_df[1] == 1]
 #clean_df.to_csv("clean_data1.csv", sep=',')
 #print(clean_df.iloc[:,19:25])
 #tree_array = []
-tree = Tree.Tree(clean_df,1)
+tree = Tree.Tree(clean_df,3)
 Tree.print_tree(tree.root_node)
 #for i in range(0,6):
 #    tree = Tree.Tree(clean_df,i)
 #    tree_array.append(tree)
 #    
 ##
-#test_row = clean_df.iloc[13,:]
+test_row = clean_df.iloc[13,:]
 #classification = []
 #for i in range(0,6):
 #    classification.append(tree_array[i].classify(test_row))
@@ -54,7 +54,7 @@ Tree.print_tree(tree.root_node)
 #
 #
 #print(Tree.confusion_matrix(test_col,test_col))
-#print(tree.classify(test_row))
+print(tree.classify(test_row))
 #test = Tree.test_sets(clean_df)
 
 #print_test = tree.root_nodes[0]
