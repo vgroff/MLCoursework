@@ -16,53 +16,42 @@ class Tree:
 #        self.root_node.print_nodetree(0)
     
     def classify(self,test_df):
-        classification = self.root_node.node_classify(test_df)
-        return classification
+        classification,probability = self.root_node.node_classify(test_df)
+        return classification,probability
     
     
-def print_tree(this_node,indent='', last='ud'):
+def print_tree(this_node,indent='', direction ='level'):
  
     children = this_node.children
     child_count = lambda node: count_children(this_node)
     size_branch = {child: child_count(child) for child in children}
-    
     if (this_node.variable!=None):
         name = str(this_node.variable)
     elif (this_node.classification!=None):
         name = str(this_node.classification)
 
-#    Making sure of even spacing based on the number of children
-    vert_up = sorted(children, key=lambda node: child_count(node))
-    vert_down = []
-    while vert_up and sum(size_branch[node] for node in vert_down) < sum(size_branch[node] for node in vert_up):
-        vert_down.append(vert_up.pop())
-
-#    first we print the top branch
-    for child in vert_up:     
-        if (vert_up.index(child) == 0):
-            next_last = 'u'
-        else:
-            next_last = 'ud'
-        next_indent = '{0}{1}{2}'.format(indent, ' ' if 'u' in last else '│', " " * len(name))
-        print_tree(child, indent=next_indent, last=next_last)
+#    fill in the children
+    upwards,downwards = [],[]
+    if(children!=[]):
+        upwards = [children[0]] 
+        downwards = [children[1]]
+        next_indent = '{0}{1}{2}'.format(indent, ' ' if (direction== 'u' or direction=='level') else '│', " " * len(name))
+        print_tree(children[0], indent=next_indent, direction='u')
 
 #   print the lines out of the current shape
-    if last == 'u': start_shape = '┌'
-    elif last == 'd': start_shape = '└'
-    elif last == 'ud': start_shape = ' '
-    else: start_shape = '├'
+    if direction == 'u': begin = '┌'
+    elif direction == 'd': begin = '└'
+    else: begin = ' '
 
-    if vert_up: end_shape = '┤'
-    elif vert_down: end_shape = '┐'
-    else: end_shape = ''
+    if upwards: finish = '┤'
+    elif downwards: finish = '┐'
+    else: finish = ''
 
-    print('{0}{1}{2}{3}'.format(indent, start_shape, name, end_shape))
+    print('{0}{1}{2}{3}'.format(indent, begin, name, finish))
 
-#   finally, print the lower branch
-    for child in vert_down:
-        next_last = 'd' if vert_down.index(child) is len(vert_down) - 1 else ''
-        next_indent = '{0}{1}{2}'.format(indent, ' ' if 'd' in last else '│', " " * len(name))
-        print_tree(child, indent=next_indent, last=next_last)
+    if(children!=[]):
+        next_indent = '{0}{1}{2}'.format(indent, ' ' if (direction== 'd' or direction=='level') else '│', " " * len(name))
+        print_tree(children[1], indent=next_indent, direction='d')
 
 
 def count_children(current_node):

@@ -13,8 +13,8 @@ class Node:
 #        check if the target variable entropy is 0 or no only the class column remains
         incoming_entropy = entropy(df,binary_target)
         if(incoming_entropy==0 or len(df.columns) < 2 or df.shape[0]==0):
-            input_prob = probability(df,binary_target)
-            self.classification = return_class(input_prob)           
+            self.input_prob = probability(df,binary_target)
+            self.classification = return_class(self.input_prob)           
             return
                 
         col_str,outgoing_entropy = info_gain(df,binary_target)
@@ -37,7 +37,9 @@ class Node:
         
 #        return a classification if you have hit a leaf node
         if(self.classification!=None):
-            return self.classification
+            if(self.classification==True):
+                return self.classification,self.input_prob[0]
+            return self.classification,self.input_prob[1]
 
 ###        otherwise, sort into left/right based on the value of the variable column
         if(test_df[self.variable]==0):
