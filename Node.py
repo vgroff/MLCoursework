@@ -3,75 +3,47 @@ import numpy as np
 
 class Node:
     def __init__(self, df, binary_target):
-        self.left = None
-        self.right = None
+        self.children = []
         self.variable = None
         self.input_prob = None
-        self.left_prob = None
-        self.right_prob = None
-        
+#        boolean classifier based on whether it equals the binary
+        self.classification = None
 #        we will define a classification [p,1-p] as the probability of being in class binary_target
 #        this is based on the incoming distribution of the node in the training data.
-        
-        self.input_prob = probability(df,binary_target)
-        
-#        check if the target variable entropy is 0
+#        check if the target variable entropy is 0 or no only the class column remains
         incoming_entropy = entropy(df,binary_target)
-        if(incoming_entropy==0):
+        if(incoming_entropy==0 or len(df.columns) < 2 or df.shape[0]==0):
+            input_prob = probability(df,binary_target)
+            self.classification = return_class(input_prob)           
             return
- #        stop when only the class label column remains        
-        if(len(df.columns) > 1):
                 
-            col_str,outgoing_entropy = info_gain(df,binary_target)
-            self.variable = col_str
-            
-            if(outgoing_entropy >= incoming_entropy):
-                return
-            
-            left_df = df.loc[df[col_str] == 0]
-            right_df = df.loc[df[col_str] == 1]
-            
-            self.left_prob = probability(left_df,binary_target)
-            self.right_prob = probability(right_df,binary_target)
+        col_str,outgoing_entropy = info_gain(df,binary_target)
+        self.variable = col_str
+        
+        if(outgoing_entropy >= incoming_entropy):
+            return
+        
+        left_df = df.loc[df[col_str] == 0]
+        right_df = df.loc[df[col_str] == 1]
+        
+        del left_df[col_str]
+        del right_df[col_str]
 
-            del left_df[col_str]
-#            print(left_df.iloc[:,10:30])
-            del right_df[col_str]
-#            if the filtered set has a uniform value for binary_target, do nothing
-            if(uniform_df(left_df,binary_target) == False and left_df.shape[0]!=0):
-                self.left = Node(left_df,binary_target)
-
-            if(uniform_df(right_df,binary_target)== False and right_df.shape[0]!=0):
-                self.right = Node(right_df,binary_target)
+        self.children.append(Node(left_df,binary_target))
+        self.children.append(Node(right_df,binary_target))
                 
     
     def node_classify(self,test_df):
         
 #        return a classification if you have hit a leaf node
-        if(self.variable==None):
-            return return_class(self.input_prob)
+        if(self.classification!=None):
+            return self.classification
 
-#        otherwise, sort into left/right based on the value of the variable column
+###        otherwise, sort into left/right based on the value of the variable column
         if(test_df[self.variable]==0):
-#           may have the case that the left node leads to nothing
-            if(self.left==None):
-                return return_class(self.left_prob)
-            else:
-                return self.left.node_classify(test_df)
-        else: #now for the right node
-#           may have the case that the right node leads to nothing
-            if(self.right==None):
-                return return_class(self.right_prob)
-            else:
-                return self.right.node_classify(test_df)
-        
-                
-    def print_nodetree(self,level):
-        print("Level ",level,", ",self.variable)
-        if(self.left!=None):
-            self.left.print_nodetree(level+1)
-        if(self.right!=None):
-            self.right.print_nodetree(level+1)
+            return self.children[0].node_classify(test_df)
+        else: 
+            return self.children[1].node_classify(test_df)
 
 
 def return_class(prob_array):
@@ -83,7 +55,7 @@ def return_class(prob_array):
 #              return a random yes/no if the probabilities are equal
         return bool(random.getrandbits(1))
 
-#This is thedistribution of the binary_target for each Node, produced from the training set    
+#This is the distribution of the binary_target for each Node, produced from the training set    
 def probability(df,binary_target):
     dist = [0,0]   
     

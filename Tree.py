@@ -1,29 +1,79 @@
 from numpy import *
 from scipy.io import *
+from graphviz import *
 import numpy as np
 import pandas as pda
 import Node
 
 
+
 class Tree:
-    def __init__(self,df):
-        
-        self.root_nodes = []
-        for i in range(0,6):
-            self.root_nodes.append(Node.Node(df,i+1))
+    
+    def __init__(self,df,binary_target):      
+        self.root_node = Node.Node(df,binary_target)
     
 #    def print_tree(self):
 #        self.root_node.print_nodetree(0)
-        
-#    function to recurse down an entire tree and remove and delete any nodes that are empty.
     
     def classify(self,test_df):
-        classification = [0 for i in range(6)]
-        
-        for j in range(0,6):
-            classification[j] = self.root_nodes[j].node_classify(test_df)
+        classification = self.root_node.node_classify(test_df)
         return classification
-        
+    
+    
+def print_tree(this_node,indent='', last='ud'):
+ 
+    children = this_node.children
+    child_count = lambda node: count_children(this_node)
+    size_branch = {child: child_count(child) for child in children}
+    
+    if (this_node.variable!=None):
+        name = str(this_node.variable)
+    elif (this_node.classification!=None):
+        name = str(this_node.classification)
+
+#    Making sure of even spacing based on the number of children
+    vert_up = sorted(children, key=lambda node: child_count(node))
+    vert_down = []
+    while vert_up and sum(size_branch[node] for node in vert_down) < sum(size_branch[node] for node in vert_up):
+        vert_down.append(vert_up.pop())
+
+#    first we print the top branch
+    for child in vert_up:     
+        if (vert_up.index(child) == 0):
+            next_last = 'u'
+        else:
+            next_last = 'ud'
+        next_indent = '{0}{1}{2}'.format(indent, ' ' if 'u' in last else '│', " " * len(name))
+        print_tree(child, indent=next_indent, last=next_last)
+
+#   print the lines out of the current shape
+    if last == 'u': start_shape = '┌'
+    elif last == 'd': start_shape = '└'
+    elif last == 'ud': start_shape = ' '
+    else: start_shape = '├'
+
+    if vert_up: end_shape = '┤'
+    elif vert_down: end_shape = '┐'
+    else: end_shape = ''
+
+    print('{0}{1}{2}{3}'.format(indent, start_shape, name, end_shape))
+
+#   finally, print the lower branch
+    for child in vert_down:
+        next_last = 'd' if vert_down.index(child) is len(vert_down) - 1 else ''
+        next_indent = '{0}{1}{2}'.format(indent, ' ' if 'd' in last else '│', " " * len(name))
+        print_tree(child, indent=next_indent, last=next_last)
+
+
+def count_children(current_node):
+    child_count = 0
+    if(type(current_node)==Node.Node):
+        child_count += 1
+        for i in current_node.children:
+            child_count += count_children(i)
+    return child_count
+
+
 
 def test_sets(input_data):
     

@@ -9,10 +9,12 @@ This is a temporary script file.
 
 from numpy import *
 from scipy.io import *
+from graphviz import *
 import pandas as pda
 import numpy as np
 import Node
 import Tree
+
 
 def Load_panda(Filename, Variable):
     mat = loadmat(Filename)
@@ -32,16 +34,33 @@ clean_df = clean_df.assign(label = clean_labels_df)
 new_clean_df = clean_df.loc[clean_df[1] == 1]
 #clean_df.to_csv("clean_data1.csv", sep=',')
 #print(clean_df.iloc[:,19:25])
-tree = Tree.Tree(clean_df)
-
-test_row = clean_df.iloc[13,:]
-test_col = clean_df.loc[:,"label"]
+#tree_array = []
+tree = Tree.Tree(clean_df,1)
+Tree.print_tree(tree.root_node)
+#for i in range(0,6):
+#    tree = Tree.Tree(clean_df,i)
+#    tree_array.append(tree)
+#    
+##
+#test_row = clean_df.iloc[13,:]
+#classification = []
+#for i in range(0,6):
+#    classification.append(tree_array[i].classify(test_row))
+#
+#print(classification)
+#test_col = clean_df.loc[:,"label"]
+#Tree.print_tree(tree.root_node)
 #print("Test Row: ",test_row)
 #
 #
 #print(Tree.confusion_matrix(test_col,test_col))
-print(tree.classify(test_row))
+#print(tree.classify(test_row))
 #test = Tree.test_sets(clean_df)
+
+#print_test = tree.root_nodes[0]
+
+#test = test_sets(clean_df)
+#print(test)
 
 
 #print("test size: ",len(test))
