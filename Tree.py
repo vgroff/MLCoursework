@@ -35,7 +35,7 @@ def print_tree(this_node,indent='', direction ='level'):
     if(children!=[]):
         upwards = [children[0]] 
         downwards = [children[1]]
-        next_indent = '{0}{1}{2}'.format(indent, ' ' if (direction== 'u' or direction=='level') else '│', " " * len(name))
+        next_indent = '{}{}{}'.format(indent, ' ' if (direction== 'u' or direction=='level') else '│', " " * len(name))
         print_tree(children[0], indent=next_indent, direction='u')
 
 #   print the lines out of the current shape
@@ -47,10 +47,10 @@ def print_tree(this_node,indent='', direction ='level'):
     elif downwards: finish = '┐'
     else: finish = ''
 
-    print('{0}{1}{2}{3}'.format(indent, begin, name, finish))
+    print('{}{}{}{}'.format(indent, begin, name, finish))
 
     if(children!=[]):
-        next_indent = '{0}{1}{2}'.format(indent, ' ' if (direction== 'd' or direction=='level') else '│', " " * len(name))
+        next_indent = '{}{}{}'.format(indent, ' ' if (direction== 'd' or direction=='level') else '│', " " * len(name))
         print_tree(children[1], indent=next_indent, direction='d')
 
 
