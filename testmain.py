@@ -35,7 +35,7 @@ new_clean_df = clean_df.loc[clean_df[1] == 1]
 #clean_df.to_csv("clean_data1.csv", sep=',')
 #print(clean_df.iloc[:,19:25])
 #tree_array = []
-tree = Tree.Tree(clean_df,3)
+tree = Tree.Tree(clean_df,5)
 Tree.print_tree(tree.root_node)
 #for i in range(0,6):
 #    tree = Tree.Tree(clean_df,i)
