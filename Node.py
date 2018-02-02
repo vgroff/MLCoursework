@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-*~
 import pandas as pd
 import numpy as np
 import random
@@ -114,7 +115,6 @@ def entropy(df, binary_target):
 
     yes = df.loc[df["label"] == binary_target].shape[0]
     no = length - yes
-    
     if(yes!=0):
         yes_cont = -((yes/length) * np.log2(yes/length))
     else:

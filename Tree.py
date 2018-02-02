@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from numpy import *
 from scipy.io import *
 from graphviz import *

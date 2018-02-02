@@ -6,7 +6,6 @@ This is a temporary script file.
 """
 
 # Function to read in the rar inputs
-
 from numpy import *
 from scipy.io import *
 from graphviz import *
@@ -23,6 +22,11 @@ def Load_panda(Filename, Variable):
 
     return output
 
+class Model():
+    def __init__(self, data):
+        dataLabels = data[["label"]]
+        print(dataLabels)
+        
 # read in the files and labels from the .mat into Panda arrays
 
 clean_df = Load_panda("./Data/cleandata_students.mat",'x')
@@ -69,6 +73,8 @@ print(tree.classify(test_row))
 #print(tree.print_tree())
 #print("original entropy: ",Node.entropy(clean_df,1))
 #Node.info_gain(clean_df, 1)
+
+model = Model(clean_df)
 
 # print(new_clean_df.loc[:,1].var())
 # print(clean_df.loc[clean_df[1] == 1].shape[0])
