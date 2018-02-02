@@ -1,5 +1,7 @@
+# -*- coding: utf-8 -*-*~
 import pandas as pd
 import numpy as np
+import random
 
 class Node:
     def __init__(self, df, binary_target):
@@ -16,11 +18,14 @@ class Node:
             self.input_prob = probability(df,binary_target)
             self.classification = return_class(self.input_prob)           
             return
-                
+        
         col_str,outgoing_entropy = info_gain(df,binary_target)
         self.variable = col_str
         
         if(outgoing_entropy >= incoming_entropy):
+            self.variable = None
+            self.input_prob = probability(df,binary_target)
+            self.classification = return_class(self.input_prob)
             return
         
         left_df = df.loc[df[col_str] == 0]
@@ -110,7 +115,6 @@ def entropy(df, binary_target):
 
     yes = df.loc[df["label"] == binary_target].shape[0]
     no = length - yes
-    
     if(yes!=0):
         yes_cont = -((yes/length) * np.log2(yes/length))
     else:
