@@ -18,7 +18,7 @@ class Tree:
     
     def classify(self,test_df):
         classification,probability = self.root_node.node_classify(test_df)
-        return classification,probability
+        return [classification,probability]
     
     
 def print_tree(this_node,indent='', direction ='level'):
