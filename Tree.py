@@ -12,6 +12,7 @@ class Tree:
     
     def __init__(self,df,binary_target):      
         self.root_node = Node.Node(df,binary_target)
+        self.binary_target = binary_target
     
 #    def print_tree(self):
 #        self.root_node.print_nodetree(0)
