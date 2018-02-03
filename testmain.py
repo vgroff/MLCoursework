@@ -74,9 +74,11 @@ test_row = clean_df.iloc[13,:]
 #print("original entropy: ",Node.entropy(clean_df,1))
 #Node.info_gain(clean_df, 1)
 
-model = Model.Model(clean_df)
-print("testing", test_row)
-print(model.classify(test_row))
+#model = Model.Model(clean_df)
+#print("testing", test_row)
+#print(model.classify(test_row))
+
+Model.crossValidate(clean_df)
 
 # print(new_clean_df.loc[:,1].var())
 # print(clean_df.loc[clean_df[1] == 1].shape[0])
