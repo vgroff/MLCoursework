@@ -23,10 +23,12 @@ class Tree:
         # calculate prediction accuracy of unpruned tree TO DO ...
         # classification method is implemented at the model layer
         unpruned_accuracy = self.classify_block(validation_df)
+        print("prunning tree")
         self.prune(self.root_node,validation_df,unpruned_accuracy)
 
     def prune(self, node, validation_df, best_accuracy):
         if(node.children[0].classification != None and node.children[1].classification != None):
+            # print("current node is leaf parent")
             # node is a leaf parent, has children that are leaves
             children = node.children
             variable = node.variable
@@ -35,33 +37,47 @@ class Tree:
 
             # calculate validation accuracy of pruned tree
             pruned_accuracy = self.classify_block(validation_df)
+
             if(pruned_accuracy < best_accuracy):
+                # revert pruning change
+                # print("Pruned tree performs worse")
                 node.children = children
                 node.variable = variable
                 node.input_prob = None
-                node.classication = None
+                node.classification = None
+                node.pruned = False
+                print("Prunning changes reversion classification: ",node.classification, " input_prob: ", node.input_prob)
             else:
+                # print("pruned tree performs just as well")
                 best_accuracy = pruned_accuracy
-
         else:
+            # print("current node is not leaf parent")
             if(node.children[0].classification == None):
+                # print("Attempting to prune left child")
                 self.prune(node.children[0],validation_df, best_accuracy)
             if(node.children[1].classification == None):
+                # print("Attempting to prune right child")
                 self.prune(node.children[1],validation_df, best_accuracy)
-            self.prune(node,validation_df, best_accuracy)
+            print("Attempting to prune self")
+            if(node.prune_attempted == False):
+                self.prune(node,validation_df, best_accuracy)
 
     def classify_block(self, df):
         tp = 0
         tn = 0
+        # print("num rows", df.shape[0])
         for i in range(0,df.shape[0]):
             # print(df.iloc[i,:])
             classication =  self.classify(df.iloc[i,:])[0]
+            # print("i", i)
             if(classication and self.binary_target == df.iloc[i]['label']):
                 tp += 1
+                # print("tp", tp)
             if(classication == False and self.binary_target != df.iloc[i]['label']):
                 tn += 1
-        accuracy = (tp+tn)/df.shape[0]
-        print("Accuracy: ", accuracy)
+                # print("tn", tn)
+        accuracy = float(tp+tn)/float(df.shape[0])
+        # print("Accuracy: ", accuracy)
         return accuracy
 
 

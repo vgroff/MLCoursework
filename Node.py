@@ -14,6 +14,8 @@ class Node:
         # track the number of instances that do not/match the binary_target
         self.true_num = None
         self.false_num = None
+        self.pruned = False
+        self.prune_attempted = False
 
         # we will define a classification [p,1-p] as the probability of being in class binary_target
         # this is based on the incoming distribution of the node in the training data.
@@ -52,11 +54,15 @@ class Node:
 
 
     def node_classify(self,test_df):
+        # if(self.pruned):
+        #     print("pruned")
 
         # return a classification if you have hit a leaf node
         if(self.classification!=None):
             if(self.classification==True):
+                # print("classification: ", self.classification, " input_prob: ", self.input_prob)
                 return self.classification,self.input_prob[0]
+            # print("classification: ", self.classification, " input_prob: ", self.input_prob)
             return self.classification,self.input_prob[1]
 
         # otherwise, sort into left/right based on the value of the variable column
@@ -66,12 +72,14 @@ class Node:
             return self.children[1].node_classify(test_df)
 
     def prunning_change(self):
-        self.input_prob = [self.true_num/(self.true_num+self.false_num),self.false_num/(self.true_num+self.false_num)]
-        self.classication = return_class(self.input_prob)
+        self.input_prob = [float(self.true_num)/float(self.true_num+self.false_num),
+                           float(self.false_num)/float(self.true_num+self.false_num)]
+        self.classification = return_class(self.input_prob)
+        self.pruned = True
         self.variable = None
         self.children = None
-        self.true_num = None
-        self.false_num = None
+        self.prune_attempted = True
+        print("Prunning changes classification: ",self.classification, " input_prob: ", self.input_prob)
 
 
 def return_class(prob_array):
