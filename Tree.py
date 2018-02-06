@@ -19,6 +19,51 @@ class Tree:
         classification,probability = self.root_node.node_classify(test_df)
         return [classification,probability]
 
+    def prune_tree(self, validation_df):
+        # calculate prediction accuracy of unpruned tree TO DO ...
+        # classification method is implemented at the model layer
+        unpruned_accuracy = self.classify_block(validation_df)
+        self.prune(self.root_node,validation_df,unpruned_accuracy)
+
+    def prune(self, node, validation_df, best_accuracy):
+        if(node.children[0].classification != None and node.children[1].classification != None):
+            # node is a leaf parent, has children that are leaves
+            children = node.children
+            variable = node.variable
+            # prune node
+            node.prunning_change()
+
+            # calculate validation accuracy of pruned tree
+            pruned_accuracy = self.classify_block(validation_df)
+            if(pruned_accuracy < best_accuracy):
+                node.children = children
+                node.variable = variable
+                node.input_prob = None
+                node.classication = None
+            else:
+                best_accuracy = pruned_accuracy
+
+        else:
+            if(node.children[0].classification == None):
+                self.prune(node.children[0],validation_df, best_accuracy)
+            if(node.children[1].classification == None):
+                self.prune(node.children[1],validation_df, best_accuracy)
+            self.prune(node,validation_df, best_accuracy)
+
+    def classify_block(self, df):
+        tp = 0
+        tn = 0
+        for i in range(0,df.shape[0]):
+            # print(df.iloc[i,:])
+            classication =  self.classify(df.iloc[i,:])[0]
+            if(classication and self.binary_target == df.iloc[i]['label']):
+                tp += 1
+            if(classication == False and self.binary_target != df.iloc[i]['label']):
+                tn += 1
+        accuracy = (tp+tn)/df.shape[0]
+        print("Accuracy: ", accuracy)
+        return accuracy
+
 
 def print_tree(this_node,indent='', direction ='level'):
 
@@ -53,7 +98,6 @@ def print_tree(this_node,indent='', direction ='level'):
         next_indent = '{}{}{}'.format(indent, ' ' if (direction== 'd' or direction=='level') else '│', " " * len(name))
         print_tree(children[1], indent=next_indent, direction='d')
 
-
 def count_children(current_node):
     child_count = 0
     if(type(current_node)==Node.Node):
@@ -61,12 +105,3 @@ def count_children(current_node):
         for i in current_node.children:
             child_count += count_children(i)
     return child_count
-
-
-def prune_tree(self, validation_df):
-    init_class,init_prob = classify(validation_df)
-    tree_copy = copy.deepcopy(self)
-    # return prune(self.root_node)
-
-# def prune(Node node):
-#     if(node.)
