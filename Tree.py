@@ -1,29 +1,27 @@
 # -*- coding: utf-8 -*-
 from numpy import *
 from scipy.io import *
-from graphviz import *
 import numpy as np
-import pandas as pda
+import pandas as pd
 import Node
-
-
+import copy
 
 class Tree:
-    
-    def __init__(self,df,binary_target):      
+
+    def __init__(self,df,binary_target):
         self.root_node = Node.Node(df,binary_target)
         self.binary_target = binary_target
-    
-#    def print_tree(self):
-#        self.root_node.print_nodetree(0)
-    
+
+    # def print_tree(self):
+    #   self.root_node.print_nodetree(0)
+
     def classify(self,test_df):
         classification,probability = self.root_node.node_classify(test_df)
         return [classification,probability]
-    
-    
+
+
 def print_tree(this_node,indent='', direction ='level'):
- 
+
     children = this_node.children
     child_count = lambda node: count_children(this_node)
     size_branch = {child: child_count(child) for child in children}
@@ -32,15 +30,15 @@ def print_tree(this_node,indent='', direction ='level'):
     elif (this_node.classification!=None):
         name = str(this_node.classification)
 
-#    fill in the children
+    # fill in the children
     upwards,downwards = [],[]
     if(children!=[]):
-        upwards = [children[0]] 
+        upwards = [children[0]]
         downwards = [children[1]]
         next_indent = '{}{}{}'.format(indent, ' ' if (direction== 'u' or direction=='level') else '│', " " * len(name))
         print_tree(children[0], indent=next_indent, direction='u')
 
-#   print the lines out of the current shape
+    # print the lines out of the current shape
     if direction == 'u': begin = '┌'
     elif direction == 'd': begin = '└'
     else: begin = ' '
@@ -65,4 +63,10 @@ def count_children(current_node):
     return child_count
 
 
+def prune_tree(self, validation_df):
+    init_class,init_prob = classify(validation_df)
+    tree_copy = copy.deepcopy(self)
+    # return prune(self.root_node)
 
+# def prune(Node node):
+#     if(node.)

@@ -8,7 +8,6 @@ This is a temporary script file.
 # Function to read in the rar inputs
 from numpy import *
 from scipy.io import *
-from graphviz import *
 import pandas as pda
 import numpy as np
 import Model
@@ -42,7 +41,7 @@ new_clean_df = clean_df.loc[clean_df[1] == 1]
 #for i in range(0,6):
 #    tree = Tree.Tree(clean_df,i)
 #    tree_array.append(tree)
-#    
+#
 ##
 test_row = clean_df.iloc[13,:]
 #classification = []

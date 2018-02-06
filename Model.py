@@ -36,14 +36,14 @@ class Model():
 
 def test_sets(input_data):
 
-#    we use a 10-fold cross-validation process
+    # we use a 10-fold cross-validation process
     num_data_points = input_data.shape[0]
     k = 10
     test_size = num_data_points // k
     test_rows = max(1,test_size)
 
 
-#    now create an array of arrays which will hold the individual test rows
+    # now create an array of arrays which will hold the individual test rows
     test_arrays = [[]]
     array_count = 0
     row = 0
@@ -74,8 +74,6 @@ def confusion_matrix(predicted,actual):
         conf_matrix[actual.iloc[i]-1][predicted[i]-1] += 1
 
     return conf_matrix
-
-
 
 def crossValidate(data):
     # Get the folds
