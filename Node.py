@@ -65,6 +65,14 @@ class Node:
         else:
             return self.children[1].node_classify(test_df)
 
+    def prunning_change(self):
+        self.input_prob = [self.true_num/(self.true_num+self.false_num),self.false_num/(self.true_num+self.false_num)]
+        self.classication = return_class(self.input_prob)
+        self.variable = None
+        self.children = None
+        self.true_num = None
+        self.false_num = None
+
 
 def return_class(prob_array):
     if(prob_array[0]>prob_array[1]):
@@ -146,12 +154,3 @@ def uniform_df(df,binary_target):
     if(entropy(df,binary_target)==0):
         return True
     return False
-
-def prunning_change():
-    self.input_prob = [true_num/(true_num+false_num),false_num/(true_num+false_num)]
-    self.classication = return_class(self.input_prob)
-    self.variable = None
-    self.children = None
-    self.true_num = None
-    self.false_num = None
-    return
