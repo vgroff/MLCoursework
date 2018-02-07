@@ -118,10 +118,10 @@ def performanceMetrics(confMatrix):
     for row in range(0,6):
         total_sum = total_sum + confMatrix.iloc[row].loc[row]
 
-    average = (total_sum/total_predictions)*100)
+    accuracy = (total_sum/total_predictions)*100
     print("Total Predictions:",total_predictions)
     print("Total Correct Predictions:",total_sum)
-    print("Classification Rate / Accuracy:", "{0:.0f}%".format(average,"\n")
+    print("Classification Rate / Accuracy:", "{0:.0f}%".format(accuracy,"\n"))
 
     # Number two: class specific classification measures
     unweighted_average_recall = 0

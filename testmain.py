@@ -77,7 +77,9 @@ test_row = clean_df.iloc[13,:]
 #print("testing", test_row)
 #print(model.classify(test_row))
 
-Model.crossValidate(clean_df)
+conf_matrix = Model.crossValidate(clean_df)
+results = Model.performanceMetrics(conf_matrix)
+print(results)
 
 # test = clean_df.iloc[0:900,:]
 # val = clean_df.iloc[901:1003,:]
