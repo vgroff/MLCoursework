@@ -77,7 +77,31 @@ test_row = clean_df.iloc[13,:]
 #print("testing", test_row)
 #print(model.classify(test_row))
 
-Model.crossValidate(clean_df)
+validation_df, test_df = Model.split(0.8, clean_df)
+#print(validation_df, test_df)
+conf_matrix = Model.crossValidate(validation_df)
+results = Model.performanceMetrics(conf_matrix)
+print(results)
+
+# test = clean_df.iloc[0:900,:]
+# val = clean_df.iloc[901:1003,:]
+# model = Model.Model(test)
+# classified = []
+# real = []
+# count = 0
+# #print(test)
+# #print(val)
+# for i in range(0,val.shape[0]):
+#     test_row = val.iloc[i,:]
+#     #test_row = test.loc(i)
+#     real.append(test_row.loc['label'])
+#     classified.append(model.classify(test_row))
+#     print( real[-1], classified[-1], model.rawClassify(test_row))
+#     if (real[-1] == classified[-1]):
+#         count += 1
+#     else:
+#         print("different")
+# print(count)
 
 # print(new_clean_df.loc[:,1].var())
 # print(clean_df.loc[clean_df[1] == 1].shape[0])

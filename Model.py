@@ -31,7 +31,8 @@ class Model():
                 result = classification
         return result[2]
 
-
+    def rawClassify(self, data):
+        return [tree.classify(data) + [i+1] for i,tree in enumerate(self.trees)]
 
 
 def test_sets(input_data):
@@ -98,40 +99,54 @@ def crossValidate(data):
         # then build the confusion matrix
         model = Model(trainingFold)
         predicted = [model.classify(validationFold.iloc[i,:]) for i in range(len(validationFold))]
+        #print(predicted)
+        #print(validationFold.loc[:, "label"])
+        #for i in range
         confMatrix = confusion_matrix(predicted, validationFold.loc[:, "label"])
         totalConfMatrix += confMatrix
 
         print(confMatrix)
 
-        # Here is where the classification measures are calculated
-        # Number one: total classification rate.
-        total_predictions = confMatrix.values.sum()
-        total_sum = 0
-        for row in range(0,6):
-            total_sum = total_sum + confMatrix.iloc[row].loc[row]
-
-        print("Total Predictions:",total_predictions)
-        print("Total Correct Predictions:",total_sum)
-        print("Classification Rate / Accuracy:", "{0:.0f}%".format((total_sum/total_predictions)*100),"\n")
-
-        # Number two: class specific classification measures
-        unweighted_average_recall = 0
-        for class_number in range(0,6):
-            print("Classification measures for class",class_number,":")
-            number_correct = confMatrix.iloc[class_number].loc[class_number]
-            total_number_of_class = confMatrix.iloc[class_number].sum()
-            total_number_labelled = confMatrix[class_number].sum()
-
-            precision = number_correct / total_number_labelled
-            recall = number_correct / total_number_of_class
-            F1 = 2*((precision*recall)/(precision+recall))
-            unweighted_average_recall = unweighted_average_recall + recall
-
-            print("Precision:","{0:.0f}%".format(precision*100))
-            print("Recall:","{0:.0f}%".format(recall*100))
-            print("F1:","{0:.0f}%".format(F1*100),"\n")
-
-        unweighted_average_recall = unweighted_average_recall / 6
-        print("Unweighted Average Recall:","{0:.0f}%".format(unweighted_average_recall*100),"\n")
 
     return totalConfMatrix
+
+def split(proportion, data):
+    num_data_points = data.shape[0]
+    dataPoints1 = int(num_data_points*proportion)
+    data1 = data.iloc[0:dataPoints1, :]
+    data2 = data.iloc[dataPoints1:num_data_points, :]
+    return [data1, data2]
+
+def performanceMetrics(confMatrix):
+    # Here is where the classification measures are calculated
+    # Number one: total classification rate.
+    total_predictions = confMatrix.values.sum()
+    total_sum = 0
+    for row in range(0,6):
+        total_sum = total_sum + confMatrix.iloc[row].loc[row]
+
+    accuracy = (total_sum/total_predictions)*100
+    print("Total Predictions:",total_predictions)
+    print("Total Correct Predictions:",total_sum)
+    print("Classification Rate / Accuracy:", "{0:.0f}%".format(accuracy,"\n"))
+
+    # Number two: class specific classification measures
+    unweighted_average_recall = 0
+    for class_number in range(0,6):
+        print("Classification measures for class",class_number,":")
+        number_correct = confMatrix.iloc[class_number].loc[class_number]
+        total_number_of_class = confMatrix.iloc[class_number].sum()
+        total_number_labelled = confMatrix[class_number].sum()
+
+        precision = number_correct / total_number_labelled
+        recall = number_correct / total_number_of_class
+        F1 = 2*((precision*recall)/(precision+recall))
+        unweighted_average_recall = unweighted_average_recall + recall
+
+        print("Precision:","{0:.0f}%".format(precision*100))
+        print("Recall:","{0:.0f}%".format(recall*100))
+        print("F1:","{0:.0f}%".format(F1*100),"\n")
+
+    unweighted_average_recall = unweighted_average_recall / 6
+    print("Unweighted Average Recall:","{0:.0f}%".format(unweighted_average_recall*100),"\n")
+    return [accuracy, precision, recall, F1, unweighted_average_recall]
