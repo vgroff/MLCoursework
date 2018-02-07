@@ -83,7 +83,7 @@ def crossValidate(data):
     # Make an array the size of the nunber of labels for the confusion matrix
     size = data.loc[:, 'label'].value_counts().shape[0]
     totalConfMatrix = pd.DataFrame(np.zeros((size, size), int))
-    for i in range(1):#nFolds):
+    for i in range(nFolds):
         # Validation fold is the ith fold
         validationFold = data.ix[test_array[i][0]:test_array[i][-1], :]
         # Put together the rest as the training fold
@@ -109,6 +109,13 @@ def crossValidate(data):
 
 
     return totalConfMatrix
+
+def split(proportion, data):
+    num_data_points = data.shape[0]
+    dataPoints1 = int(num_data_points*proportion)
+    data1 = data.iloc[0:dataPoints1, :]
+    data2 = data.iloc[dataPoints1:num_data_points, :]
+    return [data1, data2]
 
 def performanceMetrics(confMatrix):
     # Here is where the classification measures are calculated
