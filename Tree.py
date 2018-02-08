@@ -29,10 +29,10 @@ class Tree:
         if(node.children[0].classification != None and node.children[1].classification != None):
             # print("current node is leaf parent")
             # node is a leaf parent, has children that are leaves
-            print("prunning node with variable", node.variable)
+            # print("prunning node with variable", node.variable)
 
-            if(node.prune_attempted):
-                print("prune attempted")
+            # if(node.prune_attempted):
+                # print("prune attempted")
 
             children = node.children
             variable = node.variable
@@ -49,22 +49,22 @@ class Tree:
                 node.input_prob = None
                 node.classification = None
                 node.pruned = False
-                print("prune attemp reverted for node with variable ", variable)
+                # print("prune attemp reverted for node with variable ", variable)
                 # print("Prunning changes reversion classification: ",node.classification, " input_prob: ", node.input_prob)
             else:
-                print("Node with variabe ", variable, " pruned")
+                # print("Node with variabe ", variable, " pruned")
                 best_accuracy = pruned_accuracy
                 if(node.prune_attempted == False):
                     self.prune(node,validation_df, best_accuracy)
         else:
             # print("current node is not leaf parent")
             if(node.children[0].classification == None):
-                print("Attempting to prune left child with variable ", node.children[0].variable)
+                # print("Attempting to prune left child with variable ", node.children[0].variable)
                 self.prune(node.children[0],validation_df, best_accuracy)
             if(node.children[1].classification == None):
-                print("Attempting to prune right child with variable ", node.children[1].variable)
+                # print("Attempting to prune right child with variable ", node.children[1].variable)
                 self.prune(node.children[1],validation_df, best_accuracy)
-            print("Attempting to prune self with variable ", node.variable)
+            # print("Attempting to prune self with variable ", node.variable)
 
 
     def classify_block(self, df):

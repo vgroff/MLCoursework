@@ -78,10 +78,12 @@ test_row = clean_df.iloc[13,:]
 #print(model.classify(test_row))
 
 validation_df, test_df = Model.split(0.8, clean_df)
-#print(validation_df, test_df)
-conf_matrix = Model.crossValidate(validation_df)
-results = Model.performanceMetrics(conf_matrix)
-print(results)
+unpruned_conf_matrix, pruned_conf_matrix = Model.crossValidate(validation_df, 10)
+unpruned_results = Model.performanceMetrics(unpruned_conf_matrix)
+pruned_results = Model.performanceMetrics(pruned_conf_matrix)
+print(unpruned_results)
+print(pruned_results)
+
 
 # test = clean_df.iloc[0:900,:]
 # val = clean_df.iloc[901:1003,:]

@@ -77,7 +77,7 @@ class Node:
         self.classification = return_class(self.input_prob)
         self.pruned = True
         self.variable = None
-        self.children = None
+        self.children = []
         self.prune_attempted = True
         # print("Prunning changes classification: ",self.classification, " input_prob: ", self.input_prob)
 

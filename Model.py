@@ -1,6 +1,7 @@
 import Tree
 import pandas as pd
 import numpy as np
+import copy
 
 class Model():
     def __init__(self, data):
@@ -8,13 +9,17 @@ class Model():
         nTrees = data.loc[:, 'label'].value_counts().shape[0]
         # Build list nTrees long
         self.trees = []
+        self.pruned_trees = []
         for i in range(1, nTrees+1):
             self.trees.append(Tree.Tree(data, i))
             print("Tree", i, "done")
 
-    def classify(self, data):
+    def classify(self, data, is_pruned):
         # Classify each of the data points with each of the trees, giving [T/F,Probability,Emotion]
-        classifications = [tree.classify(data) + [i+1] for i,tree in enumerate(self.trees)]
+        if(is_pruned):
+            classifications = [tree.classify(data) + [i+1] for i,tree in enumerate(self.pruned_trees)]
+        else:
+            classifications = [tree.classify(data) + [i+1] for i,tree in enumerate(self.trees)]
         # Starting with the first classification, try to find the optimal one
         result = classifications[0]
         for index, classification in enumerate(classifications[1:]):
@@ -33,6 +38,12 @@ class Model():
 
     def rawClassify(self, data):
         return [tree.classify(data) + [i+1] for i,tree in enumerate(self.trees)]
+
+    def prune(self, prune_df):
+        for i in range(0, len(self.trees)):
+            tree_copy = copy.deepcopy(self.trees[i])
+            tree_copy.prune_tree(prune_df)
+            self.pruned_trees.append(tree_copy)
 
 
 def test_sets(input_data):
@@ -65,6 +76,15 @@ def test_sets(input_data):
 
     return test_arrays
 
+def get_test_dfs(input_data, k):
+    # we use a 10-fold cross-validation process
+    test_dfs = []
+    for i in range(k):
+        dfs = split(1/(k-i), input_data)
+        test_dfs.append(dfs[0])
+        input_data = dfs[1]
+    return test_dfs
+
 def confusion_matrix(predicted,actual):
 
     size = (actual.value_counts()).shape[0]
@@ -76,39 +96,42 @@ def confusion_matrix(predicted,actual):
 
     return conf_matrix
 
-def crossValidate(data):
+def crossValidate(data, k):
     # Get the folds
-    test_array = test_sets(data)
+    test_array = get_test_dfs(data, k)
     nFolds = len(test_array)
     # Make an array the size of the nunber of labels for the confusion matrix
-    size = data.loc[:, 'label'].value_counts().shape[0]
-    totalConfMatrix = pd.DataFrame(np.zeros((size, size), int))
-    for i in range(nFolds):
+    size = data.loc[:, "label"].value_counts().shape[0]
+    totalConfMatrixUnpruned = pd.DataFrame(np.zeros((size, size), int))
+    totalConfMatrixPruned = pd.DataFrame(np.zeros((size, size), int))
+    for i in range(nFolds-1):
         # Validation fold is the ith fold
-        validationFold = data.ix[test_array[i][0]:test_array[i][-1], :]
+        validationFold = test_array[i]
+        pruneFold = test_array[i+1]
         # Put together the rest as the training fold
-        if (i == 0):
-            trainingFold = data.ix[test_array[1][0]:test_array[-1][-1], :]
-        elif (i == nFolds - 1):
-            trainingFold = data.ix[test_array[0][0]:test_array[-2][-1], :]
-        else:
-            trainingFold1 = data.ix[test_array[0][0]:test_array[i-1][-1], :]
-            trainingFold2 = data.ix[test_array[i+1][0]:test_array[-1][-1], :]
-            trainingFold  = trainingFold1.append(trainingFold2)
+        trainingFolds = list(test_array)
+        del trainingFolds[i]
+        del trainingFolds[i]
+        trainingFold = trainingFolds[0]
+        pd.set_option("display.max_rows", 3)
+        pd.set_option("display.max_columns", 3)
+        for i in range(1, k-2):
+            trainingFold = trainingFold.append(trainingFolds[i])
         # Build model with training fold and get the predictions on the validation fold,
         # then build the confusion matrix
         model = Model(trainingFold)
-        predicted = [model.classify(validationFold.iloc[i,:]) for i in range(len(validationFold))]
-        #print(predicted)
-        #print(validationFold.loc[:, "label"])
-        #for i in range
-        confMatrix = confusion_matrix(predicted, validationFold.loc[:, "label"])
-        totalConfMatrix += confMatrix
+        model.prune(pruneFold)
 
-        print(confMatrix)
+        unpruned_predicted = [model.classify(validationFold.iloc[i,:], False) for i in range(len(validationFold))]
+        pruned_predicted = [model.classify(validationFold.iloc[i,:], True) for i in range(len(validationFold))]
 
+        confMatrix = confusion_matrix(unpruned_predicted, validationFold.loc[:, "label"])
+        totalConfMatrixUnpruned += confMatrix
 
-    return totalConfMatrix
+        confMatrix = confusion_matrix(pruned_predicted, validationFold.loc[:, "label"])
+        totalConfMatrixPruned += confMatrix
+
+    return totalConfMatrixUnpruned, totalConfMatrixPruned
 
 def split(proportion, data):
     num_data_points = data.shape[0]
