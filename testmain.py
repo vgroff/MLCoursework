@@ -45,6 +45,8 @@ def getResults():
         resultsFile.write("\n\n")
     resultsFile.close()
 
+def generateResultsCSV():
+
 
 # read in the files and labels from the .mat into Panda arrays
 
