@@ -5,6 +5,7 @@ import numpy as np
 class Model():
     def __init__(self, data):
         # Count the number of different values, representing each tree
+        print(data.loc[:, 'label'].value_counts())
         nTrees = data.loc[:, 'label'].value_counts().shape[0]
         # Build list nTrees long
         self.trees = []
