@@ -6,7 +6,7 @@ import copy
 class Model():
     def __init__(self, data):
         # Count the number of different values, representing each tree
-        print(data.loc[:, 'label'].value_counts())
+        #print(data.loc[:, 'label'].value_counts())
         nTrees = data.loc[:, 'label'].value_counts().shape[0]
         # Build list nTrees long
         self.trees = []
@@ -114,8 +114,8 @@ def crossValidate(data, k):
         del trainingFolds[i]
         del trainingFolds[i]
         trainingFold = trainingFolds[0]
-        pd.set_option("display.max_rows", 3)
-        pd.set_option("display.max_columns", 3)
+        #pd.set_option("display.max_rows", 3)
+        #pd.set_option("display.max_columns", 3)
         for i in range(1, k-2):
             trainingFold = trainingFold.append(trainingFolds[i])
         # Build model with training fold and get the predictions on the validation fold,
@@ -156,6 +156,9 @@ def performanceMetrics(confMatrix):
 
     # Number two: class specific classification measures
     unweighted_average_recall = 0
+    precisions = []
+    recalls = []
+    F1s = []
     for class_number in range(0,6):
         print("Classification measures for class",class_number,":")
         number_correct = confMatrix.iloc[class_number].loc[class_number]
@@ -163,8 +166,11 @@ def performanceMetrics(confMatrix):
         total_number_labelled = confMatrix[class_number].sum()
 
         precision = number_correct / total_number_labelled
+        precisions.append(precision)
         recall = number_correct / total_number_of_class
+        recalls.append(recall)
         F1 = 2*((precision*recall)/(precision+recall))
+        F1s.append(F1)
         unweighted_average_recall = unweighted_average_recall + recall
 
         print("Precision:","{0:.0f}%".format(precision*100))
@@ -173,4 +179,7 @@ def performanceMetrics(confMatrix):
 
     unweighted_average_recall = unweighted_average_recall / 6
     print("Unweighted Average Recall:","{0:.0f}%".format(unweighted_average_recall*100),"\n")
-    return [accuracy, precision, recall, F1, unweighted_average_recall]
+    results = {"accuracy":accuracy, "precision":precisions, "recall":recalls,
+     "F1":F1s, "uneweighted_average_recall":unweighted_average_recall}
+    return results
+    #return [accuracy, precision, recall, F1, unweighted_average_recall]

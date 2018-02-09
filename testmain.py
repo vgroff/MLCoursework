@@ -21,6 +21,30 @@ def Load_panda(Filename, Variable):
 
     return output
 
+def getResults():
+    resultsFile = open("results.txt", "w")
+    dataSets = [ ["./Data/cleandata_students.mat", "Clean data"],
+             ["./Data/noisydata_students.mat", "Noisy data"] ]
+    for dataSet in dataSets:
+        df = Load_panda(dataSet[0],'x')
+        lean_labels_df = Load_panda(dataSet[0],'y')
+        df = df.assign(label = clean_labels_df)
+        validation_df, test_df = Model.split(0.8, df)
+        unpruned_conf_matrix, pruned_conf_matrix = Model.crossValidate(validation_df, 10)
+        unpruned_results = Model.performanceMetrics(unpruned_conf_matrix)
+        pruned_results = Model.performanceMetrics(pruned_conf_matrix)
+        resultsFile.write(dataSet[1] + "\n")
+        resultsFile.write("Unpruned Results\n")
+        resultsFile.write(unpruned_conf_matrix.__str__())
+        resultsFile.write("\n")
+        resultsFile.write(unpruned_results.__str__())
+        resultsFile.write("\n\nPruned Results\n")
+        resultsFile.write(pruned_conf_matrix.__str__())
+        resultsFile.write("\n")
+        resultsFile.write(pruned_results.__str__())
+        resultsFile.write("\n\n")
+    resultsFile.close()
+
 
 # read in the files and labels from the .mat into Panda arrays
 
@@ -77,12 +101,15 @@ test_row = clean_df.iloc[13,:]
 #print("testing", test_row)
 #print(model.classify(test_row))
 
-validation_df, test_df = Model.split(0.8, clean_df)
-unpruned_conf_matrix, pruned_conf_matrix = Model.crossValidate(validation_df, 10)
-unpruned_results = Model.performanceMetrics(unpruned_conf_matrix)
-pruned_results = Model.performanceMetrics(pruned_conf_matrix)
-print(unpruned_results)
-print(pruned_results)
+getResults()
+
+
+#validation_df, test_df = Model.split(0.8, clean_df)
+#unpruned_conf_matrix, pruned_conf_matrix = Model.crossValidate(validation_df, 10)
+#unpruned_results = Model.performanceMetrics(unpruned_conf_matrix)
+#pruned_results = Model.performanceMetrics(pruned_conf_matrix)
+#print(unpruned_results)
+#print(pruned_results)
 
 
 # test = clean_df.iloc[0:900,:]
