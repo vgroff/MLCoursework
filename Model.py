@@ -54,6 +54,12 @@ class Model():
             else:
                 Tree.write_tree_to_file(self.trees[i].root_node, i+1, folder, is_pruned)
 
+    def test_model(self, test_df):
+        prediction = []
+        for i in range(0,test_df.shape[0]):
+            prediction.append(self.classify(test_df.iloc[i,:], False))
+        return prediction
+
 def test_sets(input_data):
 
     # we use a 10-fold cross-validation process
@@ -122,8 +128,7 @@ def crossValidate(data, k, folder):
         del trainingFolds[i]
         del trainingFolds[i]
         trainingFold = trainingFolds[0]
-        #pd.set_option("display.max_rows", 3)
-        #pd.set_option("display.max_columns", 3)
+
         for i in range(1, k-2):
             trainingFold = trainingFold.append(trainingFolds[i])
         # Build model with training fold and get the predictions on the validation fold,
