@@ -12,6 +12,8 @@ import pandas as pda
 import numpy as np
 import Model
 import Tree
+import datetime
+import os
 
 
 def Load_panda(Filename, Variable):
@@ -22,17 +24,20 @@ def Load_panda(Filename, Variable):
     return output
 
 def getResults():
-    resultsFile = open("results.txt", "w")
-    dataSets = [ ["./Data/cleandata_students.mat", "Clean data"],
-             ["./Data/noisydata_students.mat", "Noisy data"] ]
+    dt = datetime.datetime.now().strftime("%H:%M_%d-%m")
+    folder = "results_" + dt
+    os.makedirs(folder)
+    resultsFile = open(folder + "/" + "results.txt", "w")
+    dataSets = [ ["./Data/cleandata_students.mat", "Clean data", True],
+             ["./Data/noisydata_students.mat", "Noisy data", False] ]
     for dataSet in dataSets:
         df = Load_panda(dataSet[0],'x')
         lean_labels_df = Load_panda(dataSet[0],'y')
         df = df.assign(label = clean_labels_df)
         validation_df, test_df = Model.split(0.8, df)
-        unpruned_conf_matrix, pruned_conf_matrix = Model.crossValidate(validation_df, 10)
-        unpruned_results = Model.performanceMetrics(unpruned_conf_matrix)
-        pruned_results = Model.performanceMetrics(pruned_conf_matrix)
+        unpruned_conf_matrix, pruned_conf_matrix = Model.crossValidate(validation_df, 10, folder)
+        unpruned_results = Model.performanceMetricsDF(unpruned_conf_matrix, False, dataSet[2], folder)
+        pruned_results = Model.performanceMetricsDF(pruned_conf_matrix, True, dataSet[2], folder)
         resultsFile.write(dataSet[1] + "\n")
         resultsFile.write("Unpruned Results\n")
         resultsFile.write(unpruned_conf_matrix.__str__())
@@ -45,7 +50,6 @@ def getResults():
         resultsFile.write("\n\n")
     resultsFile.close()
 
-def generateResultsCSV():
 
 
 # read in the files and labels from the .mat into Panda arrays
@@ -112,7 +116,6 @@ getResults()
 #pruned_results = Model.performanceMetrics(pruned_conf_matrix)
 #print(unpruned_results)
 #print(pruned_results)
-
 
 # test = clean_df.iloc[0:900,:]
 # val = clean_df.iloc[901:1003,:]

@@ -117,6 +117,49 @@ def print_tree(this_node,indent='', direction ='level'):
         next_indent = '{}{}{}'.format(indent, ' ' if (direction== 'd' or direction=='level') else '│', " " * len(name))
         print_tree(children[1], indent=next_indent, direction='d')
 
+
+def write_tree_to_file(node, tree_num, folder):
+    treefile = open(folder + "/tree" + str(tree_num) + ".txt", "w")
+    write_tree(node,treefile)
+    treefile.close()
+
+def write_tree(this_node, treefile, indent='', direction ='level'):
+
+    children = this_node.children
+    child_count = lambda node: count_children(this_node)
+    size_branch = {child: child_count(child) for child in children}
+    if (this_node.variable!=None):
+        name = str(this_node.variable)
+    elif (this_node.classification!=None):
+        name = str(this_node.classification)
+
+    # fill in the children
+    upwards,downwards = [],[]
+    if(children!=[]):
+        upwards = [children[0]]
+        downwards = [children[1]]
+        next_indent = '{}{}{}'.format(indent, ' ' if (direction== 'u' or direction=='level') else '│', " " * len(name))
+        write_tree(children[0], treefile, indent=next_indent, direction='u')
+
+    # print the lines out of the current shape
+    if direction == 'u': begin = '┌'
+    elif direction == 'd': begin = '└'
+    else: begin = ' '
+
+    if upwards: finish = '┤'
+    elif downwards: finish = '┐'
+    else: finish = ''
+
+    # print('{}{}{}{}'.format(indent, begin, name, finish))
+    line = '{}{}{}{}'.format(indent, begin, name, finish)
+    treefile.write(line)
+    treefile.write("\n")
+
+    if(children!=[]):
+        next_indent = '{}{}{}'.format(indent, ' ' if (direction== 'd' or direction=='level') else '│', " " * len(name))
+        write_tree(children[1], treefile, indent=next_indent, direction='d')
+
+
 def count_children(current_node):
     child_count = 0
     if(type(current_node)==Node.Node):

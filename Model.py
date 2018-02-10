@@ -46,6 +46,10 @@ class Model():
             tree_copy.prune_tree(prune_df)
             self.pruned_trees.append(tree_copy)
 
+    def print_to_file(self, folder):
+        for i in range(0, len(self.trees)):
+            Tree.print_tree(self.trees[i].root_node)
+            Tree.write_tree_to_file(self.trees[i].root_node, i+1, folder)
 
 def test_sets(input_data):
 
@@ -97,7 +101,7 @@ def confusion_matrix(predicted,actual):
 
     return conf_matrix
 
-def crossValidate(data, k):
+def crossValidate(data, k, folder):
     # Get the folds
     test_array = get_test_dfs(data, k)
     nFolds = len(test_array)
@@ -122,6 +126,8 @@ def crossValidate(data, k):
         # then build the confusion matrix
         model = Model(trainingFold)
         model.prune(pruneFold)
+
+        model.print_to_file(folder)
 
         unpruned_predicted = [model.classify(validationFold.iloc[i,:], False) for i in range(len(validationFold))]
         pruned_predicted = [model.classify(validationFold.iloc[i,:], True) for i in range(len(validationFold))]
@@ -183,3 +189,79 @@ def performanceMetrics(confMatrix):
      "F1":F1s, "uneweighted_average_recall":unweighted_average_recall}
     return results
     #return [accuracy, precision, recall, F1, unweighted_average_recall]
+
+def performanceMetricsDF(confMatrix, is_pruned, is_clean, folder):
+    # Here is where the classification measures are calculated
+    # Number one: total classification rate.
+    total_predictions = confMatrix.values.sum()
+    total_sum = 0
+    for row in range(0,6):
+        total_sum = total_sum + confMatrix.iloc[row].loc[row]
+
+    accuracy = (total_sum/total_predictions)*100
+    print("Total Predictions:",total_predictions)
+    print("Total Correct Predictions:",total_sum)
+    print("Classification Rate / Accuracy:", "{0:.0f}%".format(accuracy,"\n"))
+
+    # Number two: class specific classification measures
+    unweighted_average_recall = 0
+    accuracies = []
+    precisions = []
+    recalls = []
+    F1s = []
+    for class_number in range(0,6):
+        print("Classification measures for class",class_number,":")
+        number_correct = confMatrix.iloc[class_number].loc[class_number]
+        total_number_of_class = confMatrix.iloc[class_number].sum()
+        total_number_labelled = confMatrix[class_number].sum()
+
+        # accuracies = accuracy
+        precision = number_correct / total_number_labelled
+        precisions.append(precision)
+        recall = number_correct / total_number_of_class
+        recalls.append(recall)
+        F1 = 2*((precision*recall)/(precision+recall))
+        F1s.append(F1)
+        unweighted_average_recall = unweighted_average_recall + recall
+
+        print("Precision:","{0:.0f}%".format(precision*100))
+        print("Recall:","{0:.0f}%".format(recall*100))
+        print("F1:","{0:.0f}%".format(F1*100),"\n")
+
+    unweighted_average_recall = unweighted_average_recall / 6
+    print("Unweighted Average Recall:","{0:.0f}%".format(unweighted_average_recall*100),"\n")
+    results = {"Accuracy":accuracy, "Unweighted Avg. Recall":unweighted_average_recall, "Precision":precisions, "Recall":recalls, "F1":F1s}
+
+    resultsToCSV(results, is_pruned, is_clean, folder)
+    confusionMatrixToCSV(confMatrix, is_pruned, is_clean, folder)
+    return results
+
+def resultsToCSV(results, is_pruned, is_clean, folder):
+    results_df = pd.DataFrame(results, index=['1', '2', '3', '4', '5', '6'])
+    results_df = results_df.round(2)
+
+    if(is_pruned):
+        if(is_clean):
+            results_df.to_csv(folder + "/pruned_clean_table.csv", sep='\t')
+        else:
+            results_df.to_csv(folder + "/pruned_noisy_table.csv", sep='\t')
+    else:
+        if(is_clean):
+            results_df.to_csv(folder + "/upruned_clean_table.csv", sep='\t')
+        else:
+            results_df.to_csv(folder + "/upruned_noisy_table.csv", sep='\t')
+
+    print(results_df)
+
+def confusionMatrixToCSV(confMatrix, is_pruned, is_clean, folder):
+
+    if(is_pruned):
+        if(is_clean):
+            confMatrix.to_csv(folder + "/pruned_clean_matrix.csv", sep='\t')
+        else:
+            confMatrix.to_csv(folder + "/pruned_noisy_matrix.csv", sep='\t')
+    else:
+        if(is_clean):
+            confMatrix.to_csv(folder + "/upruned_clean_matrix.csv", sep='\t')
+        else:
+            confMatrix.to_csv(folder + "/upruned_noisy_matrix.csv", sep='\t')
