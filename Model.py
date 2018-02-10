@@ -46,10 +46,13 @@ class Model():
             tree_copy.prune_tree(prune_df)
             self.pruned_trees.append(tree_copy)
 
-    def print_to_file(self, folder):
+    def print_to_file(self, folder, is_pruned):
         for i in range(0, len(self.trees)):
-            Tree.print_tree(self.trees[i].root_node)
-            Tree.write_tree_to_file(self.trees[i].root_node, i+1, folder)
+            # Tree.print_tree(self.trees[i].root_node)
+            if(is_pruned):
+                Tree.write_tree_to_file(self.pruned_trees[i].root_node, i+1, folder, is_pruned)
+            else:
+                Tree.write_tree_to_file(self.trees[i].root_node, i+1, folder, is_pruned)
 
 def test_sets(input_data):
 
@@ -103,6 +106,7 @@ def confusion_matrix(predicted,actual):
 
 def crossValidate(data, k, folder):
     # Get the folds
+    data = data.sample(frac=1).reset_index(drop=True)
     test_array = get_test_dfs(data, k)
     nFolds = len(test_array)
     # Make an array the size of the nunber of labels for the confusion matrix
@@ -127,7 +131,8 @@ def crossValidate(data, k, folder):
         model = Model(trainingFold)
         model.prune(pruneFold)
 
-        model.print_to_file(folder)
+        model.print_to_file(folder, True)
+        model.print_to_file(folder, False)
 
         unpruned_predicted = [model.classify(validationFold.iloc[i,:], False) for i in range(len(validationFold))]
         pruned_predicted = [model.classify(validationFold.iloc[i,:], True) for i in range(len(validationFold))]

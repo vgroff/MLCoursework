@@ -118,8 +118,13 @@ def print_tree(this_node,indent='', direction ='level'):
         print_tree(children[1], indent=next_indent, direction='d')
 
 
-def write_tree_to_file(node, tree_num, folder):
-    treefile = open(folder + "/tree" + str(tree_num) + ".txt", "w")
+def write_tree_to_file(node, tree_num, folder, is_pruned):
+    if(is_pruned):
+        name = "/pruned_tree"
+    else:
+        name = "/unpruned_tree"
+
+    treefile = open(folder + name + str(tree_num) + ".txt", "w")
     write_tree(node,treefile)
     treefile.close()
 
