@@ -14,6 +14,7 @@ import Model
 import Tree
 import datetime
 import os
+import pickle
 
 
 def Load_panda(Filename, Variable):
@@ -34,6 +35,7 @@ def getResults():
         df = Load_panda(dataSet[0],'x')
         labels_df = Load_panda(dataSet[0],'y')
         df = df.assign(label = labels_df)
+        df = df.sample(frac=1).reset_index(drop=True)
         validation_df, test_df = Model.split(0.8, df)
         unpruned_conf_matrix, pruned_conf_matrix = Model.crossValidate(validation_df, 10, folder)
         unpruned_results = Model.performanceMetricsDF(unpruned_conf_matrix, False, dataSet[2], folder)
@@ -50,7 +52,25 @@ def getResults():
         resultsFile.write("\n\n")
     resultsFile.close()
 
+def classifyEmotions(filename):
+    df = Load_panda(filename,'x')
+    labels_df = Load_panda(filename,'y')
+    df = df.assign(label = labels_df)
+    df = df.sample(frac=1).reset_index(drop=True)
+    f = open("model", "rb")
+    model = pickle.load(f)
+    return model.test_model(df)
 
+def saveTrees(dataFilename):
+    df = Load_panda(dataFilename,'x')
+    labels_df = Load_panda(dataFilename,'y')
+    df = df.assign(label = labels_df)
+    df = df.sample(frac=1).reset_index(drop=True)
+    model = Model.Model(df)
+    f = open("model", "wb")
+    pickle.dump(model, f)
+    
+    
 
 # read in the files and labels from the .mat into Panda arrays
 
@@ -107,8 +127,9 @@ def getResults():
 #print("testing", test_row)
 #print(model.classify(test_row))
 
-getResults()
-
+#getResults()
+#saveTrees("./Data/cleandata_students.mat")
+print(classifyEmotions("./Data/cleandata_students.mat"))
 
 #validation_df, test_df = Model.split(0.8, clean_df)
 #unpruned_conf_matrix, pruned_conf_matrix = Model.crossValidate(validation_df, 10)
