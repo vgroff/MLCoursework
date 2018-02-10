@@ -48,7 +48,7 @@ class Model():
 
     def print_to_file(self, folder):
         for i in range(0, len(self.trees)):
-            Tree.print_tree(self.trees[i].root_node)
+            #Tree.print_tree(self.trees[i].root_node)
             Tree.write_tree_to_file(self.trees[i].root_node, i+1, folder)
 
 def test_sets(input_data):

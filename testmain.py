@@ -29,11 +29,11 @@ def getResults():
     os.makedirs(folder)
     resultsFile = open(folder + "/" + "results.txt", "w")
     dataSets = [ ["./Data/cleandata_students.mat", "Clean data", True],
-             ["./Data/noisydata_students.mat", "Noisy data", False] ]
+                 ["./Data/noisydata_students.mat", "Noisy data", False] ]
     for dataSet in dataSets:
         df = Load_panda(dataSet[0],'x')
-        lean_labels_df = Load_panda(dataSet[0],'y')
-        df = df.assign(label = clean_labels_df)
+        labels_df = Load_panda(dataSet[0],'y')
+        df = df.assign(label = labels_df)
         validation_df, test_df = Model.split(0.8, df)
         unpruned_conf_matrix, pruned_conf_matrix = Model.crossValidate(validation_df, 10, folder)
         unpruned_results = Model.performanceMetricsDF(unpruned_conf_matrix, False, dataSet[2], folder)
@@ -54,13 +54,13 @@ def getResults():
 
 # read in the files and labels from the .mat into Panda arrays
 
-clean_df = Load_panda("./Data/cleandata_students.mat",'x')
+#clean_df = Load_panda("./Data/cleandata_students.mat",'x')
 # print(clean_df)
-clean_labels_df = Load_panda("./Data/cleandata_students.mat",'y')
+#clean_labels_df = Load_panda("./Data/cleandata_students.mat",'y')
 #clean_df.append(clean_labels_df)
-clean_df = clean_df.assign(label = clean_labels_df)
+#clean_df = clean_df.assign(label = clean_labels_df)
 # print(clean_df)
-new_clean_df = clean_df.loc[clean_df[1] == 1]
+#new_clean_df = clean_df.loc[clean_df[1] == 1]
 #clean_df.to_csv("clean_data1.csv", sep=',')
 #print(clean_df.iloc[:,19:25])
 #tree_array = []
@@ -73,7 +73,7 @@ new_clean_df = clean_df.loc[clean_df[1] == 1]
 #    tree_array.append(tree)
 #
 ##
-test_row = clean_df.iloc[13,:]
+#test_row = clean_df.iloc[13,:]
 #classification = []
 #for i in range(0,6):
 #    classification.append(tree_array[i].classify(test_row))
@@ -141,6 +141,16 @@ getResults()
 # print(clean_df.loc[clean_df[1] == 1].shape[0])
 # print(clean_df)
 # print(new_clean_df)
-noisy_df = Load_panda("./Data/noisydata_students.mat",'x')
-noisy_labels_df = Load_panda("./Data/noisydata_students.mat",'y')
-noisy_df = noisy_df.assign(label = noisy_labels_df)
+#noisy_df = Load_panda("./Data/noisydata_students.mat",'x')
+#noisy_labels_df = Load_panda("./Data/noisydata_students.mat",'y')
+#noisy_df = noisy_df.assign(label = noisy_labels_df)
+
+#dt = datetime.datetime.now().strftime("%H:%M_%d-%m")
+#folder = "results_" + dt
+#os.makedirs(folder)
+
+#validation_df, test_df = Model.split(0.8, noisy_df)
+#unpruned_conf_matrix, pruned_conf_matrix = Model.crossValidate(validation_df, 10, folder)
+#unpruned_results = Model.performanceMetrics(unpruned_conf_matrix)
+    
+#print(unpruned_conf_matrix, pruned_conf_matrix)
