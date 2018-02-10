@@ -1,0 +1,99 @@
+                                ┌False
+                             ┌17┤
+                             │  └False
+                           ┌0┤
+                           │ │     ┌True
+                           │ │  ┌13┤
+                           │ │  │  └False
+                           │ └12┤
+                           │    └False
+                        ┌10┤
+                        │  └True
+                      ┌8┤
+                      │ └True
+                   ┌20┤
+                   │  └False
+                 ┌7┤
+                 │ └True
+               ┌5┤
+               │ └True
+            ┌27┤
+            │  └False
+          ┌9┤
+          │ └False
+        ┌1┤
+        │ │  ┌False
+        │ └21┤
+        │    └True
+      ┌6┤
+      │ │ ┌False
+      │ └0┤
+      │   │     ┌False
+      │   │  ┌42┤
+      │   │  │  └True
+      │   └28┤
+      │      │ ┌True
+      │      └2┤
+      │        └False
+   ┌24┤
+   │  │     ┌False
+   │  │  ┌15┤
+   │  │  │  │  ┌False
+   │  │  │  └33┤
+   │  │  │     └False
+   │  └39┤
+   │     │ ┌False
+   │     └3┤
+   │       │         ┌False
+   │       │       ┌5┤
+   │       │       │ └True
+   │       │     ┌0┤
+   │       │     │ └True
+   │       │  ┌26┤
+   │       │  │  └False
+   │       └41┤
+   │          └False
+ 14┤
+   │           ┌True
+   │        ┌24┤
+   │        │  └False
+   │      ┌1┤
+   │      │ │ ┌False
+   │      │ └2┤
+   │      │   └False
+   │   ┌11┤
+   │   │  └False
+   │ ┌4┤
+   │ │ └False
+   └3┤
+     │                 ┌False
+     │               ┌0┤
+     │               │ │     ┌True
+     │               │ │  ┌34┤
+     │               │ │  │  └True
+     │               │ └10┤
+     │               │    └False
+     │            ┌43┤
+     │            │  └True
+     │         ┌17┤
+     │         │  └True
+     │      ┌27┤
+     │      │  └False
+     │    ┌4┤
+     │    │ └False
+     │ ┌35┤
+     │ │  └True
+     └6┤
+       │                ┌True
+       │             ┌24┤
+       │             │  └False
+       │          ┌34┤
+       │          │  └True
+       │       ┌15┤
+       │       │  └False
+       │    ┌25┤
+       │    │  └False
+       │  ┌5┤
+       │  │ └False
+       └30┤
+          └False
