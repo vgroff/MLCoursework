@@ -6,15 +6,15 @@ import copy
 class Model():
     def __init__(self, data):
         # Count the number of different values, representing each tree
-        #print(data.loc[:, 'label'].value_counts())
         nTrees = data.loc[:, 'label'].value_counts().shape[0]
-        # Build list nTrees long
+        # Build list nTrees long for both pruned and unpruned trees
         self.trees = []
         self.pruned_trees = []
         for i in range(1, nTrees+1):
             self.trees.append(Tree.Tree(data, i))
             print("Tree", i, "done")
 
+    # Take a data point and return its overall classification
     def classify(self, data, is_pruned):
         # Classify each of the data points with each of the trees, giving [T/F,Probability,Emotion]
         if(is_pruned):
@@ -37,9 +37,11 @@ class Model():
                 result = classification
         return result[2]
 
+    # Take a data point and return the raw classification from each of the n trees
     def rawClassify(self, data):
         return [tree.classify(data) + [i+1] for i,tree in enumerate(self.trees)]
 
+    # Prune each tree and create a list of pruned trees
     def prune(self, prune_df):
         for i in range(0, len(self.trees)):
             tree_copy = copy.deepcopy(self.trees[i])
@@ -90,6 +92,7 @@ def test_sets(input_data):
 
     return test_arrays
 
+# Produce k folds from a data frame
 def get_test_dfs(input_data, k):
     # we use a 10-fold cross-validation process
     test_dfs = []
@@ -99,6 +102,7 @@ def get_test_dfs(input_data, k):
         input_data = dfs[1]
     return test_dfs
 
+# Produce a confusion matrix from predicated and actual data
 def confusion_matrix(predicted,actual):
 
     size = (actual.value_counts()).shape[0]
@@ -110,6 +114,7 @@ def confusion_matrix(predicted,actual):
 
     return conf_matrix
 
+# Do k fold cross-validation and return the confusion matrices
 def crossValidate(data, k, folder):
     # Get the folds
     data = data.sample(frac=1).reset_index(drop=True)
@@ -150,6 +155,7 @@ def crossValidate(data, k, folder):
 
     return totalConfMatrixUnpruned, totalConfMatrixPruned
 
+# Splits a data frame into 2 data frames of size proprtion*originalSize and (1-proportion)*originalSize
 def split(proportion, data):
     num_data_points = data.shape[0]
     dataPoints1 = int(num_data_points*proportion)
@@ -157,6 +163,7 @@ def split(proportion, data):
     data2 = data.iloc[dataPoints1:num_data_points, :]
     return [data1, data2]
 
+# Produce performance metrixs from confusion matrix
 def performanceMetrics(confMatrix):
     # Here is where the classification measures are calculated
     # Number one: total classification rate.
@@ -200,6 +207,7 @@ def performanceMetrics(confMatrix):
     return results
     #return [accuracy, precision, recall, F1, unweighted_average_recall]
 
+# Produce performance metrics from confusion matrix and save it to file
 def performanceMetricsDF(confMatrix, is_pruned, is_clean, folder):
     # Here is where the classification measures are calculated
     # Number one: total classification rate.

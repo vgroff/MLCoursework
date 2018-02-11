@@ -25,11 +25,12 @@ class Node:
             self.input_prob = probability(df,binary_target)
             self.classification = return_class(self.input_prob)
             return
-
+        # Get the column label with the best info gain
         col_str,outgoing_entropy = info_gain(df,binary_target)
         self.variable = col_str
-
         if(outgoing_entropy >= incoming_entropy):
+            # If this info gain is not an improvement (entropy worse),
+            # we are at a leaf node and so we set the classification
             self.variable = None
             self.input_prob = probability(df,binary_target)
             self.classification = return_class(self.input_prob)
@@ -41,28 +42,22 @@ class Node:
 
         self.true_num = df.loc[df["label"] == binary_target].shape[0]
         self.false_num = length - self.true_num
-
+        # Find the data frames of the left and right child respectively
         left_df = df.loc[df[col_str] == 0]
         right_df = df.loc[df[col_str] == 1]
-
+        # Remove the column we have just used
         del left_df[col_str]
         del right_df[col_str]
-
-
+        # (Recursively) create children and save to memory
         self.children.append(Node(left_df,binary_target))
         self.children.append(Node(right_df,binary_target))
 
 
     def node_classify(self,test_df):
-        # if(self.pruned):
-        #     print("pruned")
-
-        # return a classification if you have hit a leaf node
         if(self.classification!=None):
+            # If we have hit a leaf node, return the classification and associated probability
             if(self.classification==True):
-                # print("classification: ", self.classification, " input_prob: ", self.input_prob)
                 return self.classification,self.input_prob[0]
-            # print("classification: ", self.classification, " input_prob: ", self.input_prob)
             return self.classification,self.input_prob[1]
 
         # otherwise, sort into left/right based on the value of the variable column
@@ -79,7 +74,6 @@ class Node:
         self.variable = None
         self.children = []
         self.prune_attempted = True
-        # print("Prunning changes classification: ",self.classification, " input_prob: ", self.input_prob)
 
 
 def return_class(prob_array):
@@ -107,10 +101,8 @@ def probability(df,binary_target):
 
 
 def info_gain(df, binary_target):
-    # print("incoming data frame: ",df)
     min_col = None
     min_entropy = None
-    # print("incoming entropy: ",entropy(df,binary_target))
     # generate column list
     column_list = list(df)
     # for all columns in the dataframe except for the class label column
@@ -122,18 +114,14 @@ def info_gain(df, binary_target):
         one_count = one_df.shape[0]
         zero_count = zero_df.shape[0]
 
-        # print("info gain: column(",column_list[i],"), one_count(",one_count,"), zero_count(",zero_count,")")
-
         one_entropy = entropy(one_df,binary_target)
         zero_entropy = entropy(zero_df,binary_target)
         # ws is the remaining entropy in the system after filtering by the column
         ws = (one_count*one_entropy + zero_count*zero_entropy)/(one_count+zero_count)
-        # print("ws", ws, " i",i)
         if((min_entropy == None) or (ws < min_entropy)):
             min_entropy = ws
             min_col = column_list[i]
 
-    # print("min_col: ",min_col,"min entropy: ",min_entropy)
     return min_col,min_entropy
 
 def entropy(df, binary_target):
