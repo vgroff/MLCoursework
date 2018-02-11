@@ -1,32 +1,65 @@
 from numpy import *
 from scipy.io import *
-import pandas as pda
+import pandas as pd
 import numpy as np
 import Model
 import Tree
+import datetime
+import os
+import pickle
 
-def Load_panda(Filename, Variable):
+def LoadAsDF(Filename, Variable):
     mat = loadmat(Filename)
     array = mat[Variable]
-    output = pda.DataFrame(array)
+    df = pd.DataFrame(array)
+    return df
 
-    return output
+def EvaluateModel(folder, df, is_clean):
+    training_df, test_df = Model.split(0.8, df)
 
-clean_df = Load_panda("./Data/cleandata_students.mat",'x')
-clean_labels_df = Load_panda("./Data/cleandata_students.mat",'y')
+    models, unpruned_conf_matrix_cv, pruned_conf_matrix_cv = Model.crossValidate(training_df, 3, folder, is_clean)
+    unpruned_results_cv = Model.performanceMetrics(unpruned_conf_matrix_cv)
+    pruned_results_cv = Model.performanceMetrics(pruned_conf_matrix_cv)
+
+    Model.resultsToCSV(unpruned_results_cv, False, is_clean, True, folder)
+    Model.confusionMatrixToCSV(unpruned_conf_matrix_cv, False, is_clean, True, folder)
+
+    Model.resultsToCSV(pruned_results_cv, True, is_clean, True, folder)
+    Model.confusionMatrixToCSV(pruned_conf_matrix_cv, True, is_clean, True, folder)
+
+    ConfMatrixUnpruned_t, ConfMatrixPruned_t, unpruned_results_t, pruned_results_t = Model.test(models, test_df)
+
+    Model.resultsToCSV(unpruned_results_t, False, is_clean, False, folder)
+    Model.confusionMatrixToCSV(ConfMatrixUnpruned_t, False, is_clean, False, folder)
+
+    Model.resultsToCSV(pruned_results_t, True, is_clean, False, folder)
+    Model.confusionMatrixToCSV(ConfMatrixPruned_t, True, is_clean, False, folder)
+
+    return models
+
+def saveModels(models, is_clean):
+    if(is_clean):
+        name = "cleanModels"
+    else:
+        name = "noisyModels"
+
+    modelFile = open(name, "wb")
+    pickle.dump(models, modelFile)
+
+dt = datetime.datetime.now().strftime("%H:%M_%d-%m")
+folder = "results_" + dt
+os.makedirs(folder)
+
+clean_df = LoadAsDF("./Data/cleandata_students.mat",'x')
+clean_labels_df = LoadAsDF("./Data/cleandata_students.mat",'y')
 clean_df = clean_df.assign(label = clean_labels_df)
 
-training_df, test_df = Model.split(0.8, clean_df)
+cleanModels = EvaluateModel(folder, clean_df, True)
+saveModels(cleanModels, True)
 
-unpruned_conf_matrix, pruned_conf_matrix = Model.crossValidate(validation_df, 10)
-unpruned_results = Model.performanceMetrics(unpruned_conf_matrix)
-pruned_results = Model.performanceMetrics(pruned_conf_matrix)
-
-print("Unpruned Results")
-print(unpruned_results)
-print("Pruned Results")
-print(pruned_results)
-
-noisy_df = Load_panda("./Data/noisydata_students.mat",'x')
-noisy_labels_df = Load_panda("./Data/noisydata_students.mat",'y')
+noisy_df = LoadAsDF("./Data/noisydata_students.mat",'x')
+noisy_labels_df = LoadAsDF("./Data/noisydata_students.mat",'y')
 noisy_df = noisy_df.assign(label = noisy_labels_df)
+
+noisyModels = EvaluateModel(folder, noisy_df, False)
+saveModels(noisyModels, False)

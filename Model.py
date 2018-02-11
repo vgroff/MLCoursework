@@ -7,7 +7,7 @@ class Model():
     def __init__(self, data):
         # Count the number of different values, representing each tree
         #print(data.loc[:, 'label'].value_counts())
-        nTrees = data.loc[:, 'label'].value_counts().shape[0]
+        nTrees = 1#data.loc[:, 'label'].value_counts().shape[0]
         # Build list nTrees long
         self.trees = []
         self.pruned_trees = []
@@ -46,13 +46,13 @@ class Model():
             tree_copy.prune_tree(prune_df)
             self.pruned_trees.append(tree_copy)
 
-    def print_to_file(self, folder, is_pruned):
+    def print_to_file(self, folder, is_pruned, is_clean):
         for i in range(0, len(self.trees)):
             # Tree.print_tree(self.trees[i].root_node)
             if(is_pruned):
-                Tree.write_tree_to_file(self.pruned_trees[i].root_node, i+1, folder, is_pruned)
+                Tree.write_tree_to_file(self.pruned_trees[i].root_node, i+1, folder, is_pruned, is_clean)
             else:
-                Tree.write_tree_to_file(self.trees[i].root_node, i+1, folder, is_pruned)
+                Tree.write_tree_to_file(self.trees[i].root_node, i+1, folder, is_pruned, is_clean)
 
     def test_model(self, test_df):
         prediction = []
@@ -110,11 +110,13 @@ def confusion_matrix(predicted,actual):
 
     return conf_matrix
 
-def crossValidate(data, k, folder):
+def crossValidate(data, k, folder, is_clean):
     # Get the folds
     data = data.sample(frac=1).reset_index(drop=True)
     test_array = get_test_dfs(data, k)
     nFolds = len(test_array)
+    models = []
+
     # Make an array the size of the nunber of labels for the confusion matrix
     size = data.loc[:, "label"].value_counts().shape[0]
     totalConfMatrixUnpruned = pd.DataFrame(np.zeros((size, size), int))
@@ -134,21 +136,24 @@ def crossValidate(data, k, folder):
         # Build model with training fold and get the predictions on the validation fold,
         # then build the confusion matrix
         model = Model(trainingFold)
+        models.append(model)
+
         model.prune(pruneFold)
 
-        model.print_to_file(folder, True)
-        model.print_to_file(folder, False)
+        model.print_to_file(folder, True, is_clean)
+        model.print_to_file(folder, False, is_clean)
 
         unpruned_predicted = [model.classify(validationFold.iloc[i,:], False) for i in range(len(validationFold))]
         pruned_predicted = [model.classify(validationFold.iloc[i,:], True) for i in range(len(validationFold))]
 
-        confMatrix = confusion_matrix(unpruned_predicted, validationFold.loc[:, "label"])
-        totalConfMatrixUnpruned += confMatrix
+        confMatrixUnpruned = confusion_matrix(unpruned_predicted, validationFold.loc[:, "label"])
+        totalConfMatrixUnpruned += confMatrixUnpruned
 
-        confMatrix = confusion_matrix(pruned_predicted, validationFold.loc[:, "label"])
-        totalConfMatrixPruned += confMatrix
+        confMatrixPruned = confusion_matrix(pruned_predicted, validationFold.loc[:, "label"])
+        totalConfMatrixPruned += confMatrixPruned
 
-    return totalConfMatrixUnpruned, totalConfMatrixPruned
+
+    return models, totalConfMatrixUnpruned, totalConfMatrixPruned
 
 def split(proportion, data):
     num_data_points = data.shape[0]
@@ -200,7 +205,7 @@ def performanceMetrics(confMatrix):
     return results
     #return [accuracy, precision, recall, F1, unweighted_average_recall]
 
-def performanceMetricsDF(confMatrix, is_pruned, is_clean, folder):
+def performanceMetricsDF(confMatrix):
     # Here is where the classification measures are calculated
     # Number one: total classification rate.
     total_predictions = confMatrix.values.sum()
@@ -242,36 +247,75 @@ def performanceMetricsDF(confMatrix, is_pruned, is_clean, folder):
     print("Unweighted Average Recall:","{0:.0f}%".format(unweighted_average_recall*100),"\n")
     results = {"Accuracy":accuracy, "Unweighted Avg. Recall":unweighted_average_recall, "Precision":precisions, "Recall":recalls, "F1":F1s}
 
-    resultsToCSV(results, is_pruned, is_clean, folder)
-    confusionMatrixToCSV(confMatrix, is_pruned, is_clean, folder)
+    # resultsToCSV(results, is_pruned, is_clean, True, folder)
+    # confusionMatrixToCSV(confMatrix, is_pruned, is_clean, True, folder)
+
     return results
 
-def resultsToCSV(results, is_pruned, is_clean, folder):
+def resultsToCSV(results, is_pruned, is_clean, is_cross_val, folder):
     results_df = pd.DataFrame(results, index=['1', '2', '3', '4', '5', '6'])
     results_df = results_df.round(2)
 
+    filename = "/"
     if(is_pruned):
-        if(is_clean):
-            results_df.to_csv(folder + "/pruned_clean_table.csv", sep='\t')
-        else:
-            results_df.to_csv(folder + "/pruned_noisy_table.csv", sep='\t')
+        filename = filename + "pruned_"
     else:
-        if(is_clean):
-            results_df.to_csv(folder + "/upruned_clean_table.csv", sep='\t')
-        else:
-            results_df.to_csv(folder + "/upruned_noisy_table.csv", sep='\t')
+        filename = filename + "unpruned_"
+
+    if(is_clean):
+        filename = filename + "clean_"
+    else:
+        filename = filename + "noisy_"
+
+    if(is_cross_val):
+        filename = filename + "cross_val_"
+    else:
+        filename = filename + "test_"
+
+    filename = filename + "table"
+
+    results_df.to_csv(folder + filename + ".csv", sep='\t')
 
     print(results_df)
 
-def confusionMatrixToCSV(confMatrix, is_pruned, is_clean, folder):
-
+def confusionMatrixToCSV(confMatrix, is_pruned, is_clean, is_cross_val, folder):
+    filename = "/"
     if(is_pruned):
-        if(is_clean):
-            confMatrix.to_csv(folder + "/pruned_clean_matrix.csv", sep='\t')
-        else:
-            confMatrix.to_csv(folder + "/pruned_noisy_matrix.csv", sep='\t')
+        filename = filename + "pruned_"
     else:
-        if(is_clean):
-            confMatrix.to_csv(folder + "/upruned_clean_matrix.csv", sep='\t')
-        else:
-            confMatrix.to_csv(folder + "/upruned_noisy_matrix.csv", sep='\t')
+        filename = filename + "unpruned_"
+
+    if(is_clean):
+        filename = filename + "clean_"
+    else:
+        filename = filename + "noisy_"
+
+    if(is_cross_val):
+        filename = filename + "cross_val_"
+    else:
+        filename = filename + "test_"
+
+    filename = filename + "matrix"
+
+    confMatrix.to_csv(folder + filename + ".csv", sep='\t')
+
+def test(models, test_df):
+
+    size = test_df.loc[:, "label"].value_counts().shape[0]
+    totalConfMatrixUnpruned = pd.DataFrame(np.zeros((size, size), int))
+    totalConfMatrixPruned = pd.DataFrame(np.zeros((size, size), int))
+
+    for model in models:
+        unpruned_predicted = [model.classify(test_df.iloc[i,:], False) for i in range(len(test_df))]
+        pruned_predicted = [model.classify(test_df.iloc[i,:], True) for i in range(len(test_df))]
+
+        confMatrixUnpruned = confusion_matrix(unpruned_predicted, test_df.loc[:, "label"])
+        totalConfMatrixUnpruned += confMatrixUnpruned
+
+        confMatrixPruned = confusion_matrix(pruned_predicted, test_df.loc[:, "label"])
+        totalConfMatrixPruned += confMatrixPruned
+
+    unpruned_results  = performanceMetricsDF(confMatrixUnpruned)
+    pruned_results = performanceMetricsDF(confMatrixPruned)
+
+    return totalConfMatrixUnpruned, totalConfMatrixPruned, unpruned_results, pruned_results
