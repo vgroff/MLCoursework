@@ -1,0 +1,57 @@
+               ┌False
+            ┌39┤
+            │  └False
+         ┌36┤
+         │  │ ┌False
+         │  └9┤
+         │    └False
+       ┌3┤
+       │ └False
+     ┌0┤
+     │ └False
+   ┌5┤
+   │ │            ┌False
+   │ │         ┌24┤
+   │ │         │  └True
+   │ │       ┌3┤
+   │ │       │ │  ┌False
+   │ │       │ └33┤
+   │ │       │    └True
+   │ │    ┌26┤
+   │ │    │  └False
+   │ │  ┌1┤
+   │ │  │ │  ┌False
+   │ │  │ └31┤
+   │ │  │    └False
+   │ └16┤
+   │    └False
+ 11┤
+   │                    ┌False
+   │                 ┌42┤
+   │                 │  └False
+   │              ┌40┤
+   │              │  └True
+   │           ┌36┤
+   │           │  └True
+   │         ┌9┤
+   │         │ │  ┌True
+   │         │ └10┤
+   │         │    └False
+   │       ┌0┤
+   │       │ └False
+   │    ┌16┤
+   │    │  └False
+   │ ┌25┤
+   │ │  │    ┌True
+   │ │  │ ┌22┤
+   │ │  │ │  └False
+   │ │  └4┤
+   │ │    └False
+   └5┤
+     │     ┌True
+     │  ┌36┤
+     │  │  └False
+     └24┤
+        │ ┌True
+        └0┤
+          └True

@@ -1,9 +1,4 @@
 # -*- coding: utf-8 -*-
-"""
-Spyder Editor
-
-This is a temporary script file.
-"""
 
 # Function to read in the rar inputs
 from numpy import *
@@ -59,8 +54,9 @@ def classifyEmotions(filename):
     labels_df = Load_panda(filename,'y')
     df = df.assign(label = labels_df)
     df = df.sample(frac=1).reset_index(drop=True)
-    f = open("model", "rb")
+    f = open("./Final_Model/model", "rb")
     model = pickle.load(f)
+    f.close()
     return model.test_model(df)
 
 # Produce a model from .mat data and save it to file using pickle
@@ -69,7 +65,14 @@ def saveTrees(dataFilename):
     labels_df = Load_panda(dataFilename,'y')
     df = df.assign(label = labels_df)
     df = df.sample(frac=1).reset_index(drop=True)
-    model = Model.Model(df)
-    f = open("model", "wb")
-    pickle.dump(model, f)
+    train_df, prune_df = Model.split(0.8, df)
 
+    model = Model.Model(train_df)
+    model.prune(prune_df)
+
+    model.print_to_file("./Final_Model", True)
+    model.print_to_file("./Final_Model", False)
+
+    f = open("./Final_Model/model", "wb")
+    pickle.dump(model, f)
+    f.close()
