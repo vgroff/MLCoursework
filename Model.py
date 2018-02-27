@@ -58,8 +58,9 @@ class Model():
 
     def test_model(self, test_df):
         prediction = []
+        print("shape 0 ",test_df.shape[0])
         for i in range(0,test_df.shape[0]):
-            prediction.append(self.classify(test_df.iloc[i,:], True))
+            prediction.append(self.classify(test_df.iloc[i,:], False))
         return prediction
 
 def test_sets(input_data):

@@ -78,4 +78,9 @@ def saveTrees(dataFilename):
     f.close()
 
 # uncomment line below and replace filename with the name of the .mat file
-# predictions = classifyEmotions(filename)
+predictions = classifyEmotions("Data/cleandata_students")
+labels = Load_panda("Data/cleandata_students",'y')
+print(labels[0])
+Model.performanceMetrics(Model.confusion_matrix(predictions, labels[0]))
+
+# print(predictions)
